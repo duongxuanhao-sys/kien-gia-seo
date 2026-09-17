@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage'
 import KeywordPage from './pages/KeywordPage'
 import ContentGeneratorPage from './pages/ContentGeneratorPage'
 import AnalyticsPage from './pages/AnalyticsPage'
+import SettingsPage from './pages/SettingsPage'
 import Header from './components/Header'
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
       setCurrentPage('generator')
     } else if (path.includes('/analytics')) {
       setCurrentPage('analytics')
+    } else if (path.includes('/settings')) {
+      setCurrentPage('settings')
     } else {
       setCurrentPage('dashboard')
     }
@@ -38,6 +41,7 @@ function App() {
     localStorage.removeItem('user')
     setIsLoggedIn(false)
     setCurrentPage('dashboard')
+    window.location.href = '/'
   }
 
   const handleNavigate = (page: string) => {
@@ -58,6 +62,7 @@ function App() {
         {currentPage === 'keywords' && <KeywordPage />}
         {currentPage === 'generator' && <ContentGeneratorPage />}
         {currentPage === 'analytics' && <AnalyticsPage />}
+        {currentPage === 'settings' && <SettingsPage />}
       </main>
     </div>
   )
