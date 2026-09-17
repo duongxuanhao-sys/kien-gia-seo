@@ -1,13 +1,34 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
+import KeywordPage from './pages/KeywordPage'
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState('dashboard')
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    setIsLoggedIn(!!token)
+    setLoading(false)
+
+    // Detect current page from URL
+    const path = window.location.pathname
+    if (path.includes('/keywords')) setCurrentPage('keywords')
+    else if (path.includes('/generator')) setCurrentPage('generator')
+    else setCurrentPage('dashboard')
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+
+  if (!isLoggedIn) return <LoginPage />
+
   return (
-    <div style={{ padding: '40px', fontFamily: 'Arial' }}>
-      <h1>🔧 KIẾN GIÁ SEO</h1>
-      <p>✓ Frontend running on port 5173</p>
-      <p>✓ Backend: <a href="http://localhost:3001">http://localhost:3001</a></p>
-      <p>Ready for development!</p>
-    </div>
+    <>
+      {currentPage === 'dashboard' && <DashboardPage />}
+      {currentPage === 'keywords' && <KeywordPage />}
+    </>
   )
 }
 
