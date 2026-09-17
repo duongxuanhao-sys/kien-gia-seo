@@ -27,37 +27,10 @@ export default function DashboardPage() {
     }
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    window.location.href = '/'
-  }
-
   return (
     <div style={{ padding: '20px' }}>
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '30px',
-        borderBottom: '1px solid #ddd',
-        paddingBottom: '15px'
-      }}>
-        <h1>🔧 KIẾN GIÁ SEO Dashboard</h1>
-        <div>
-          <span style={{ marginRight: '20px' }}>Welcome, {user?.name || 'User'}</span>
-          <button onClick={handleLogout} style={{
-            padding: '8px 16px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}>
-            Logout
-          </button>
-        </div>
-      </nav>
+      <h1 style={{ marginTop: 0 }}>Welcome, {user?.name || 'User'}! 👋</h1>
+      <p style={{ color: '#666', marginBottom: '30px' }}>Choose a feature to get started</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
         <Card title="🔍 Keyword Research" description="Find profitable keywords" link="/keywords" />

@@ -10,104 +10,87 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Mock users database
-const users = [
-  { id: 1, name: 'Hảo', email: 'test@example.com', password: 'password' }
-];
+// ============ DATABASE ============
+interface User {
+  id: number
+  name: string
+  email: string
+  password: string
+  createdAt: Date
+}
 
-// Root route
+interface Keyword {
+  id: number
+  userId: number
+  keyword: string
+  volume: number
+  difficulty: number
+  cpc: number
+  competition: string
+  createdAt: Date
+}
+
+interface Content {
+  id: number
+  userId: number
+  keywordId: number
+  title: string
+  outline: string
+  article: string
+  seoOptimized: string
+  internalLinks: string[]
+  status: 'draft' | 'published'
+  createdAt: Date
+  updatedAt: Date
+}
+
+const db = {
+  users: [
+    { id: 1, name: 'Hảo', email: 'test@example.com', password: 'password', createdAt: new Date() }
+  ] as User[],
+  keywords: [] as Keyword[],
+  contents: [] as Content[]
+}
+
+// ============ AUTH ============
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'KIẾN GIÁ SEO Backend', 
-    status: 'running'
-  });
+  res.json({ message: 'KIẾN GIÁ SEO Backend', status: 'running' });
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Login API
-// Thêm dòng này vào file backend/src/index.ts (sau login API)
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = db.users.find(u => u.email === email && u.password === password);
 
-// Keyword search API
-// Content generation API
-app.post('/api/content/generate', (req, res) => {
-  const { keyword, step } = req.body;
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'No token' });
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid credentials' });
   }
 
-  // Mock content generation
-  const mockContent: any = {
-    1: {
-      content: { keyword }
-    },
-    2: {
-      content: {
-        keyword,
-        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`
-      }
-    },
-    3: {
-      content: {
-        keyword,
-        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`,
-        article: `# ${keyword}\n\nWhen it comes to ${keyword}, there are many factors to consider. In this comprehensive guide, we'll explore everything you need to know about ${keyword}.\n\n## Why ${keyword} Matters\n\n${keyword} is important because it directly impacts your success. Studies show that companies focusing on ${keyword} see 35% better results. Let's dive deeper into the key aspects of ${keyword}...`,
-        title: `The Ultimate Guide to ${keyword}`
-      }
-    },
-    4: {
-      content: {
-        keyword,
-        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`,
-        article: `# ${keyword}\n\nWhen it comes to ${keyword}, there are many factors to consider...`,
-        seoOptimized: `Meta Title: The Ultimate Guide to ${keyword} | Expert Tips\nMeta Description: Learn everything about ${keyword}. This comprehensive guide covers best practices, tips, and strategies.\nFocus Keyword: ${keyword}\nKeyword Density: 3.2%\nReadability: Flesch Reading Ease 65/100`
-      }
-    },
-    5: {
-      content: {
-        keyword,
-        internalLinks: [
-          `Check out our [Best Practices for ${keyword}](/blog/best-practices)`,
-          `Learn more about [Advanced ${keyword} Techniques](/blog/advanced)`,
-          `See our [${keyword} Case Studies](/blog/cases)`
-        ]
-      }
-    },
-    6: {
-      content: {
-        keyword
-      }
-    }
-  };
+  const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email })).toString('base64');
 
-  res.json({ content: mockContent[step] || {} });
+  res.json({
+    token,
+    user: { id: user.id, name: user.name, email: user.email }
+  });
 });
+
+// ============ KEYWORDS ============
 app.post('/api/keywords/search', (req, res) => {
   const { keyword } = req.body;
-  const token = req.headers.authorization?.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ message: 'No token' });
-  }
-
-  // Mock keyword data (thay bằng Ahrefs API sau)
   const mockKeywords: any = {
-    'running shoes': [
-      { keyword: 'best running shoes', volume: 12100, difficulty: 45, cpc: 2.5, competition: 'High' },
-      { keyword: 'running shoes for men', volume: 8900, difficulty: 38, cpc: 2.1, competition: 'High' },
-      { keyword: 'running shoes for women', volume: 7200, difficulty: 35, cpc: 1.9, competition: 'Medium' },
-      { keyword: 'best running shoes 2024', volume: 4500, difficulty: 28, cpc: 2.3, competition: 'Medium' },
-    ],
     'seo': [
       { keyword: 'seo tips', volume: 8900, difficulty: 52, cpc: 3.2, competition: 'High' },
       { keyword: 'seo for beginners', volume: 6700, difficulty: 35, cpc: 2.8, competition: 'Medium' },
       { keyword: 'seo tools', volume: 5400, difficulty: 48, cpc: 2.9, competition: 'High' },
-    ]
+    ],
+    'running shoes': [
+      { keyword: 'best running shoes', volume: 12100, difficulty: 45, cpc: 2.5, competition: 'High' },
+      { keyword: 'running shoes for men', volume: 8900, difficulty: 38, cpc: 2.1, competition: 'High' },
+    ],
   };
 
   const results = mockKeywords[keyword.toLowerCase()] || [
@@ -122,43 +105,66 @@ app.post('/api/keywords/search', (req, res) => {
 
   res.json({ results });
 });
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
 
-  const user = users.find(u => u.email === email && u.password === password);
+app.get('/api/keywords/my-searches', (req, res) => {
+  const userKeywords = db.keywords;
+  res.json({ keywords: userKeywords });
+});
 
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
+// ============ CONTENT ============
+app.post('/api/content/generate', (req, res) => {
+  const { keyword, step } = req.body;
 
-  // Mock JWT token
-  const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email })).toString('base64');
+  const mockContent: any = {
+    1: { content: { keyword } },
+    2: { content: { keyword, outline: `1. Intro\n2. Why ${keyword} Matters\n3. Best Practices` } },
+    3: { content: { keyword, article: `# ${keyword}\n\nComprehensive guide...` } },
+    4: { content: { seoOptimized: `Meta Title: ${keyword}\nMeta Desc: Learn about ${keyword}` } },
+    5: { content: { internalLinks: [`Check our ${keyword} guide`] } },
+    6: { content: { keyword } }
+  };
+
+  res.json({ content: mockContent[step] || {} });
+});
+
+app.post('/api/content/publish', (req, res) => {
+  const { keyword, title, article, platform } = req.body;
+
+  const content: Content = {
+    id: db.contents.length + 1,
+    userId: 1,
+    keywordId: 0,
+    title,
+    outline: '',
+    article,
+    seoOptimized: '',
+    internalLinks: [],
+    status: 'published',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+
+  db.contents.push(content);
 
   res.json({
-    token,
-    user: { id: user.id, name: user.name, email: user.email }
+    message: `Content published to ${platform}`,
+    content
   });
 });
 
-// Logout API (bỏ qua, frontend xóa token là được)
-app.post('/api/auth/logout', (req, res) => {
-  res.json({ message: 'Logged out' });
+app.get('/api/content/my-articles', (req, res) => {
+  res.json({ articles: db.contents });
 });
 
-// Protected route example
-app.get('/api/user/profile', (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ message: 'No token' });
-  }
-
-  try {
-    const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
-    res.json({ user: decoded });
-  } catch {
-    res.status(401).json({ message: 'Invalid token' });
-  }
+// ============ USER ============
+app.get('/api/user/stats', (req, res) => {
+  res.json({
+    stats: {
+      totalKeywords: db.keywords.length,
+      totalArticles: db.contents.length,
+      articlesPublished: db.contents.filter(c => c.status === 'published').length
+    }
+  });
 });
 
 app.listen(PORT, () => {
