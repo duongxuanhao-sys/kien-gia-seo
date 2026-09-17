@@ -32,6 +32,61 @@ app.get('/api/health', (req, res) => {
 // Thêm dòng này vào file backend/src/index.ts (sau login API)
 
 // Keyword search API
+// Content generation API
+app.post('/api/content/generate', (req, res) => {
+  const { keyword, step } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token' });
+  }
+
+  // Mock content generation
+  const mockContent: any = {
+    1: {
+      content: { keyword }
+    },
+    2: {
+      content: {
+        keyword,
+        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`
+      }
+    },
+    3: {
+      content: {
+        keyword,
+        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`,
+        article: `# ${keyword}\n\nWhen it comes to ${keyword}, there are many factors to consider. In this comprehensive guide, we'll explore everything you need to know about ${keyword}.\n\n## Why ${keyword} Matters\n\n${keyword} is important because it directly impacts your success. Studies show that companies focusing on ${keyword} see 35% better results. Let's dive deeper into the key aspects of ${keyword}...`,
+        title: `The Ultimate Guide to ${keyword}`
+      }
+    },
+    4: {
+      content: {
+        keyword,
+        outline: `1. Introduction to ${keyword}\n2. Why ${keyword} Matters\n3. Best Practices\n4. Case Studies\n5. Tips & Tricks\n6. Conclusion`,
+        article: `# ${keyword}\n\nWhen it comes to ${keyword}, there are many factors to consider...`,
+        seoOptimized: `Meta Title: The Ultimate Guide to ${keyword} | Expert Tips\nMeta Description: Learn everything about ${keyword}. This comprehensive guide covers best practices, tips, and strategies.\nFocus Keyword: ${keyword}\nKeyword Density: 3.2%\nReadability: Flesch Reading Ease 65/100`
+      }
+    },
+    5: {
+      content: {
+        keyword,
+        internalLinks: [
+          `Check out our [Best Practices for ${keyword}](/blog/best-practices)`,
+          `Learn more about [Advanced ${keyword} Techniques](/blog/advanced)`,
+          `See our [${keyword} Case Studies](/blog/cases)`
+        ]
+      }
+    },
+    6: {
+      content: {
+        keyword
+      }
+    }
+  };
+
+  res.json({ content: mockContent[step] || {} });
+});
 app.post('/api/keywords/search', (req, res) => {
   const { keyword } = req.body;
   const token = req.headers.authorization?.split(' ')[1];

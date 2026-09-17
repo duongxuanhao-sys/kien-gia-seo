@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import KeywordPage from './pages/KeywordPage'
+import ContentGeneratorPage from './pages/ContentGeneratorPage'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -28,6 +29,7 @@ function App() {
     <>
       {currentPage === 'dashboard' && <DashboardPage />}
       {currentPage === 'keywords' && <KeywordPage />}
+      {currentPage === 'generator' && <ContentGeneratorPage />}
     </>
   )
 }
